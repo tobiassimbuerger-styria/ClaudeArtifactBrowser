@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "id": "c245f120-7791-421c-9fcf-489cc364a028",
+    "title": "AWS Services Galaxy",
+    "author": "community",
+    "tags": ["programming", "aws"],
+    "created": "2026-11-25T15:00:00Z",
+    "voters": []
+  },
+  {
+    "id": "4d9134ff-7034-4ced-862a-13c0ccacd6f1",
+    "title": "Azure Services Dashboard",
+    "author": "community",
+    "tags": ["programming", "azure"],
+    "created": "2026-11-25T15:00:00Z",
+    "voters": []
+  },
+  {
+    "id": "9aa361f5-f430-4576-ac09-bc636cf62f26",
+    "title": "Space Jam: MJ vs Monstars",
+    "author": "community",
+    "tags": ["game"],
+    "created": "2026-11-25T15:00:00Z",
+    "voters": []
+  }
+]
