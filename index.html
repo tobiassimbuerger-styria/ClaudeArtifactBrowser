@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="/">
+  <title>Lesezeichen – browse public Claude artifacts</title>
+  <meta name="description" content="Discover, launch and share public Claude artifacts. Browse by tag and see what is hyped right now.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Lesezeichen</h1>
+    <input id="search" type="search" placeholder="Search artifacts" aria-label="Search artifacts">
+    <select id="sort" aria-label="Sort by">
+      <option value="hyped">Hyped</option>
+      <option value="new">New</option>
+      <option value="top">Top</option>
+    </select>
+    <div id="signin"></div>
+    <button id="submit-open" hidden>Post artifact</button>
+  </header>
+  <nav id="tags" aria-label="Tags"></nav>
+  <main>
+    <div id="grid"></div>
+    <p id="empty" hidden>No artifacts found.</p>
+  </main>
+  <dialog id="viewer">
+    <div class="bar">
+      <strong id="viewer-title"></strong>
+      <a id="viewer-link" target="_blank" rel="noopener">Open on claude.ai</a>
+      <button id="viewer-close" aria-label="Close">✕</button>
+    </div>
+    <iframe id="viewer-frame" title="Artifact" allow="clipboard-write"></iframe>
+  </dialog>
+  <dialog id="submit">
+    <form id="submit-form">
+      <h2>Post a public Claude artifact</h2>
+      <label>Link
+        <input name="url" type="url" required placeholder="https://claude.ai/public/artifacts/…">
+      </label>
+      <label>Title
+        <input name="title" required maxlength="80">
+      </label>
+      <label>Tags, comma separated
+        <input name="tags" placeholder="game, tool">
+      </label>
+      <div class="actions">
+        <button type="button" id="submit-cancel">Cancel</button>
+        <button>Post</button>
+      </div>
+    </form>
+  </dialog>
+  <script src="https://accounts.google.com/gsi/client" defer></script>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
