@@ -6,7 +6,7 @@ const template = readFileSync("index.html", "utf8").replace('<base href="/">', (
 const escapeHtml = (text) => text.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 rmSync("dist", { recursive: true, force: true });
-for (const file of ["app.js", "config.js", "style.css", "data"]) cpSync(file, `dist/${file}`, { recursive: true });
+for (const file of ["app.js", "config.js", "style.css", "privacy.html", "data"]) cpSync(file, `dist/${file}`, { recursive: true });
 writeFileSync("dist/index.html", template);
 // GitHub Pages serves 404.html for unknown paths, which keeps links to not yet built artifact pages working.
 writeFileSync("dist/404.html", template);
