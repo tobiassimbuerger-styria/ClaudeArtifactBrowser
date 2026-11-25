@@ -4,52 +4,81 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <base href="/">
-  <title>Lesezeichen – browse public Claude artifacts</title>
-  <meta name="description" content="Discover, launch and share public Claude artifacts. Browse by tag and see what is hyped right now.">
+  <title>Artifact Browser – discover public Claude artifacts</title>
+  <meta name="description" content="Discover, launch and share public Claude artifacts. Browse games, tools and experiments by tag and see what is hyped right now.">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.orange.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Lesezeichen</h1>
-    <input id="search" type="search" placeholder="Search artifacts" aria-label="Search artifacts">
-    <select id="sort" aria-label="Sort by">
-      <option value="hyped">Hyped</option>
-      <option value="new">New</option>
-      <option value="top">Top</option>
-    </select>
-    <div id="signin"></div>
-    <button id="submit-open" hidden>Post artifact</button>
+  <header class="container">
+    <nav>
+      <ul>
+        <li><a class="brand" href="./">Artifact Browser</a></li>
+      </ul>
+      <ul>
+        <li><div id="signin"></div></li>
+        <li><button id="submit-open" hidden>Post artifact</button></li>
+      </ul>
+    </nav>
   </header>
-  <nav id="tags" aria-label="Tags"></nav>
-  <main>
+  <main class="container">
+    <section class="hero">
+      <h1>Discover public Claude artifacts</h1>
+      <p>Games, tools and experiments built with Claude. Launch them with one click, vote for the best, post your own.</p>
+    </section>
+    <div role="group">
+      <input id="search" type="search" placeholder="Search artifacts" aria-label="Search artifacts">
+      <select id="sort" aria-label="Sort by">
+        <option value="hyped">Hyped</option>
+        <option value="new">New</option>
+        <option value="top">Top</option>
+      </select>
+    </div>
+    <div id="tags" aria-label="Tags"></div>
     <div id="grid"></div>
     <p id="empty" hidden>No artifacts found.</p>
   </main>
-  <footer><a href="privacy.html">Privacy</a></footer>
+  <footer class="container">
+    <small>
+      <a href="privacy.html">Privacy</a> ·
+      <a href="https://github.com/tobiassimbuerger-styria/ClaudeArtifactBrowser">GitHub</a> ·
+      Unofficial community site, not affiliated with Anthropic.
+    </small>
+  </footer>
   <dialog id="viewer">
-    <h2 id="viewer-title"></h2>
-    <div class="actions">
-      <button id="viewer-close">Browse all</button>
-      <a id="viewer-link" target="_blank" rel="noopener">Launch on claude.ai</a>
-    </div>
+    <article>
+      <div id="viewer-cover" class="cover"></div>
+      <h2 id="viewer-title"></h2>
+      <p id="viewer-description"></p>
+      <footer>
+        <button id="viewer-close" class="secondary">Browse all</button>
+        <a id="viewer-link" role="button" target="_blank" rel="noopener">Launch on claude.ai</a>
+      </footer>
+    </article>
   </dialog>
   <dialog id="submit">
-    <form id="submit-form">
+    <article>
       <h2>Post a public Claude artifact</h2>
-      <label>Link
-        <input name="url" type="url" required placeholder="https://claude.ai/artifact/…">
-      </label>
-      <label>Title
-        <input name="title" required maxlength="80">
-      </label>
-      <label>Tags, comma separated
-        <input name="tags" placeholder="game, tool">
-      </label>
-      <div class="actions">
-        <button type="button" id="submit-cancel">Cancel</button>
-        <button>Post</button>
-      </div>
-    </form>
+      <form id="submit-form">
+        <label>Link
+          <input name="url" type="url" required placeholder="https://claude.ai/artifact/…">
+        </label>
+        <label>Title
+          <input name="title" required maxlength="80">
+        </label>
+        <label>Description
+          <textarea name="description" maxlength="200" rows="2" placeholder="What does it do?"></textarea>
+        </label>
+        <label>Tags, comma separated
+          <input name="tags" placeholder="game, tool, learn, creative">
+        </label>
+        <footer>
+          <button type="button" id="submit-cancel" class="secondary">Cancel</button>
+          <button>Post</button>
+        </footer>
+      </form>
+    </article>
   </dialog>
   <script src="https://accounts.google.com/gsi/client" defer></script>
   <script src="app.js" type="module"></script>

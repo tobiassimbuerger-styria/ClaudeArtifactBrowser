@@ -14,9 +14,10 @@ writeFileSync("dist/404.html", template);
 // One static page per artifact, so search engines get a real URL with its own title.
 for (const a of artifacts) {
   const title = escapeHtml(a.title);
-  const description = `${title} – a public Claude artifact by ${escapeHtml(a.author)}. Tags: ${a.tags.join(", ")}.`;
+  const summary = a.description ? `${escapeHtml(a.description)} ` : "";
+  const description = `${title}: ${summary}A public Claude artifact by ${escapeHtml(a.author)}. Tags: ${a.tags.join(", ")}.`;
   const page = template
-    .replace(/<title>.*<\/title>/, () => `<title>${title} – Lesezeichen</title>\n  <link rel="canonical" href="${base}/a/${a.id}/">`)
+    .replace(/<title>.*<\/title>/, () => `<title>${title} – Artifact Browser</title>\n  <link rel="canonical" href="${base}/a/${a.id}/">`)
     .replace(/(<meta name="description" content=")[^"]*/, (_, prefix) => prefix + description);
   mkdirSync(`dist/a/${a.id}`, { recursive: true });
   writeFileSync(`dist/a/${a.id}/index.html`, page);

@@ -3,27 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Privacy – Lesezeichen</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Privacy – Artifact Browser</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.orange.min.css">
 </head>
 <body>
-  <main>
+  <main class="container">
     <h1>Privacy</h1>
     <p>This site lists links to public Claude artifacts. Browsing needs no account.</p>
     <h2>Signing in with Google</h2>
     <p>Posting and voting require a Google sign-in. When you post or vote, Google confirms your sign-in to our
       server. We do not receive your password and do not store your email address.</p>
     <ul>
-      <li><strong>Posts:</strong> the link, title and tags you enter are published together with the first name
-        of your Google account.</li>
+      <li><strong>Posts:</strong> the link, title, description and tags you enter are published together with the
+        first name of your Google account.</li>
       <li><strong>Votes:</strong> we store a salted hash of your Google account id so each account can vote once.
         The hash cannot be turned back into your account.</li>
     </ul>
     <p>Posts and vote hashes are stored in a public GitHub repository and are visible to everyone.</p>
     <h2>Service providers</h2>
-    <p>The site is hosted on GitHub Pages, the server runs on Cloudflare Workers, and sign-in uses Google Identity
-      Services. These providers process technical data such as your IP address, and Google sets cookies for the
-      sign-in. The site sets no cookies of its own and uses no analytics or advertising.</p>
+    <p>The site is hosted on GitHub Pages, the server runs on Cloudflare Workers, sign-in uses Google Identity
+      Services, and the stylesheet is loaded from jsDelivr. These providers process technical data such as your IP
+      address, and Google sets cookies for the sign-in. The site sets no cookies of its own and uses no analytics
+      or advertising.</p>
     <h2>Removal and contact</h2>
     <p>To have a post or your votes removed, open an issue in the
       <a href="https://github.com/tobiassimbuerger-styria/ClaudeArtifactBrowser/issues">GitHub repository</a>.</p>

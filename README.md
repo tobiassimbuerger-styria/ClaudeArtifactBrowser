@@ -39,16 +39,18 @@ Posting and voting need the deployed worker.
 ## Moderation
 
 Edit `data/artifacts.json` and push. Entries look like this; `id` is the last part of
-`https://claude.ai/artifact/<id>` or `https://claude.ai/public/artifacts/<id>`, `voters` holds salted hashes of Google account ids.
+`https://claude.ai/artifact/<id>` or `https://claude.ai/public/artifacts/<id>`, `voters` and `downvoters` hold salted hashes of Google account ids.
 
 ```json
 {
   "id": "00000000-0000-0000-0000-000000000000",
   "title": "Pomodoro timer",
+  "description": "A simple focus timer.",
   "author": "someone",
   "tags": ["tool", "productivity"],
   "created": "2026-11-25T10:00:00Z",
-  "voters": []
+  "voters": [],
+  "downvoters": []
 }
 ```
 

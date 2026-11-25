@@ -1,6 +1,7 @@
 const ARTIFACT_URL = /^https:\/\/claude\.ai\/(?:public\/artifacts\/([0-9a-f-]{36})|artifact\/([0-9A-Za-z]{16,32}))(?:[/?#]|$)/;
 const TAG = /^[a-z0-9-]{1,20}$/;
 const MAX_TITLE = 80;
+const MAX_DESCRIPTION = 200;
 const MAX_TAGS = 5;
 const WRITE_ATTEMPTS = 3;
 
@@ -22,12 +23,15 @@ async function verify(request, env) {
   return { voter, name: claims.given_name ?? "anonymous" };
 }
 
-function submit(list, user, { url, title, tags }) {
+function submit(list, user, { url, title, description = "", tags }) {
   const match = typeof url === "string" && ARTIFACT_URL.exec(url);
   const id = match && (match[1] ?? match[2]);
   if (!id) throw new HttpError(400, "Not a public Claude artifact link");
   if (typeof title !== "string" || !title.trim() || title.length > MAX_TITLE) {
     throw new HttpError(400, `Title must have 1 to ${MAX_TITLE} characters`);
+  }
+  if (typeof description !== "string" || description.length > MAX_DESCRIPTION) {
+    throw new HttpError(400, `Description must have at most ${MAX_DESCRIPTION} characters`);
   }
   if (!Array.isArray(tags) || tags.length > MAX_TAGS || !tags.every((t) => typeof t === "string" && TAG.test(t))) {
     throw new HttpError(400, `Up to ${MAX_TAGS} tags, lowercase letters, digits and dashes only`);
@@ -36,20 +40,26 @@ function submit(list, user, { url, title, tags }) {
   list.push({
     id,
     title: title.trim(),
+    description: description.trim(),
     author: user.name,
     tags,
     created: new Date().toISOString(),
     voters: [user.voter],
+    downvoters: [],
   });
   return `Add artifact ${id}`;
 }
 
-function vote(list, user, { id }) {
+/** Repeating the same vote takes it back; the opposite vote replaces it. */
+function vote(list, user, { id, value }) {
   const artifact = list.find((a) => a.id === id);
   if (!artifact) throw new HttpError(404, "Unknown artifact");
-  const index = artifact.voters.indexOf(user.voter);
-  if (index === -1) artifact.voters.push(user.voter);
-  else artifact.voters.splice(index, 1);
+  if (value !== 1 && value !== -1) throw new HttpError(400, "Vote must be 1 or -1");
+  const chosen = value === 1 ? "voters" : "downvoters";
+  const repeated = artifact[chosen].includes(user.voter);
+  artifact.voters = artifact.voters.filter((v) => v !== user.voter);
+  artifact.downvoters = artifact.downvoters.filter((v) => v !== user.voter);
+  if (!repeated) artifact[chosen].push(user.voter);
   return `Vote on artifact ${id}`;
 }
 
