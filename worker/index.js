@@ -1,4 +1,4 @@
-const ARTIFACT_URL = /^https:\/\/claude\.ai\/public\/artifacts\/([0-9a-f-]{36})(?:[/?#]|$)/;
+const ARTIFACT_URL = /^https:\/\/claude\.ai\/(?:public\/artifacts\/([0-9a-f-]{36})|artifact\/([0-9A-Za-z]{16,32}))(?:[/?#]|$)/;
 const TAG = /^[a-z0-9-]{1,20}$/;
 const MAX_TITLE = 80;
 const MAX_TAGS = 5;
@@ -23,7 +23,8 @@ async function verify(request, env) {
 }
 
 function submit(list, user, { url, title, tags }) {
-  const id = typeof url === "string" && ARTIFACT_URL.exec(url)?.[1];
+  const match = typeof url === "string" && ARTIFACT_URL.exec(url);
+  const id = match && (match[1] ?? match[2]);
   if (!id) throw new HttpError(400, "Not a public Claude artifact link");
   if (typeof title !== "string" || !title.trim() || title.length > MAX_TITLE) {
     throw new HttpError(400, `Title must have 1 to ${MAX_TITLE} characters`);

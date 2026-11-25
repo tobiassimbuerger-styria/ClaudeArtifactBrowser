@@ -1,9 +1,10 @@
 import { API_URL, GOOGLE_CLIENT_ID } from "./config.js";
 
-const ARTIFACT_ID = /^[0-9a-f-]{36}$/;
+const ARTIFACT_ID = /^[0-9A-Za-z-]{16,36}$/;
+const UUID = /^[0-9a-f-]{36}$/;
 // Claude forbids framing its artifact pages on other sites, so artifacts launch in a new tab.
-const launchUrl = (id) => `https://claude.ai/public/artifacts/${id}`;
-const ARTIFACT_PATH = /\/a\/([0-9a-f-]{36})\/?$/;
+const launchUrl = (id) => `https://claude.ai/${UUID.test(id) ? "public/artifacts" : "artifact"}/${id}`;
+const ARTIFACT_PATH = /\/a\/([0-9A-Za-z-]{16,36})\/?$/;
 const HOUR_MS = 36e5;
 const HOME = new URL(document.baseURI).pathname;
 
