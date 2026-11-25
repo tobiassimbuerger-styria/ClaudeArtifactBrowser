@@ -1,3 +1,7 @@
 dist/
 node_modules/
 .wrangler/
+*.csv
+edit_csv.R
+scratchpad.md
+todos.md

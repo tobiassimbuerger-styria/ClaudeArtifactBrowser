@@ -5,12 +5,17 @@ const UUID = /^[0-9a-f-]{36}$/;
 // Claude forbids framing its artifact pages on other sites, so artifacts launch in a new tab.
 const launchUrl = (id) => `https://claude.ai/${UUID.test(id) ? "public/artifacts" : "artifact"}/${id}`;
 const ARTIFACT_PATH = /\/a\/([0-9A-Za-z-]{16,36})\/?$/;
+const TAG_PATH = new RegExp("/t/([a-z0-9-]{1,20})/?$");
 const HOUR_MS = 36e5;
 const REPO_URL = "https://github.com/tobiassimbuerger-styria/ClaudeArtifactBrowser";
 const HOME = new URL(document.baseURI).pathname;
 const COVER_WIDTH = 640;
 const COVER_HEIGHT = 360;
-const TAG_ICONS = { game: "🎮", tool: "🛠️", programming: "💻", learn: "📚", creative: "🎨", data: "📊", fun: "🎉" };
+// Outline icons from Feather (MIT licence).
+const THUMB_PATHS = {
+  1: "M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3",
+  [-1]: "M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17",
+};
 
 const score = (a) => a.voters.length - a.downvoters.length;
 // Votes decay with age so fresh artifacts can overtake old favorites.
@@ -31,7 +36,8 @@ const el = (tag, className, text) => {
 };
 
 let artifacts = [];
-let activeTag = null;
+const tagFromPath = () => TAG_PATH.exec(location.pathname)?.[1] ?? null;
+let activeTag = tagFromPath();
 let token = null;
 
 async function api(route, body) {
@@ -58,7 +64,7 @@ async function api(route, body) {
 function paintGeneratedCover(node, a) {
   const hue = [...a.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 360;
   node.style.setProperty("--hue", hue);
-  node.replaceChildren(TAG_ICONS[a.tags.find((t) => TAG_ICONS[t])] ?? a.title[0].toUpperCase());
+  node.replaceChildren(a.title[0].toUpperCase());
 }
 
 function paintCover(node, a) {
@@ -88,8 +94,11 @@ async function coverData(file) {
   return canvas.toDataURL("image/jpeg", 0.8).split(",")[1];
 }
 
-function voteButton(a, value, label) {
-  const button = el("button", "vote outline secondary", label);
+function voteButton(a, value, count) {
+  const button = el("button", "vote outline secondary", "");
+  button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${THUMB_PATHS[value]}"/></svg>`;
+  button.append(count);
+  button.ariaLabel = value === 1 ? "Thumbs up" : "Thumbs down";
   button.onclick = () => api("vote", { id: a.id, value });
   return button;
 }
@@ -113,7 +122,7 @@ function card(a) {
   report.href = `${REPO_URL}/issues/new?title=${encodeURIComponent(`Report artifact ${a.id}`)}`;
   report.target = "_blank";
   report.rel = "noopener";
-  actions.append(voteButton(a, 1, `👍 ${a.voters.length}`), voteButton(a, -1, "👎"), share, report);
+  actions.append(voteButton(a, 1, a.voters.length), voteButton(a, -1, ""), share, report);
   const node = el("article", "card", "");
   node.append(
     cover,
@@ -137,7 +146,11 @@ function render() {
   const tags = [...new Set(artifacts.flatMap((a) => a.tags))].sort();
   $("tags").replaceChildren(...tags.map((t) => {
     const chip = el("button", t === activeTag ? "chip" : "chip outline", `#${t}`);
-    chip.onclick = () => { activeTag = t === activeTag ? null : t; render(); };
+    chip.onclick = () => {
+      activeTag = t === activeTag ? null : t;
+      history.pushState(null, "", activeTag ? new URL(`t/${activeTag}/`, document.baseURI) : HOME);
+      render();
+    };
     return chip;
   }));
 }
@@ -162,7 +175,11 @@ $("viewer-close").onclick = () => $("viewer").close();
 $("viewer").onclose = () => {
   if (ARTIFACT_PATH.test(location.pathname)) history.pushState(null, "", HOME);
 };
-window.onpopstate = syncViewer;
+window.onpopstate = () => {
+  activeTag = tagFromPath();
+  render();
+  syncViewer();
+};
 
 $("submit-open").onclick = () => $("submit").showModal();
 $("submit-cancel").onclick = () => $("submit").close();

@@ -34,8 +34,8 @@
   place-items: center;
   height: 140px;
   margin: 0 -1rem 0.5rem;
-  background: linear-gradient(135deg, hsl(var(--hue) 75% 58%), hsl(calc(var(--hue) + 50) 70% 42%));
-  color: #fff;
+  background: linear-gradient(135deg, hsl(var(--hue) 32% var(--cover-light)), hsl(calc(var(--hue) + 30) 28% calc(var(--cover-light) - 10%)));
+  color: var(--pico-color);
   font-size: 3rem;
   font-weight: 700;
 }
@@ -62,6 +62,7 @@ body > footer { padding-top: 2rem; text-align: center; }
 /* Warm paper palette in the spirit of Claude's look, with our own colours and system fonts only. */
 :root:not([data-theme]) {
   --pico-font-family-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --cover-light: 82%;
   --pico-background-color: #f6f1e7;
   --pico-color: #2c2620;
   --pico-h1-color: #2c2620;
@@ -85,6 +86,7 @@ body > footer { padding-top: 2rem; text-align: center; }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
+    --cover-light: 34%;
     --pico-background-color: #1f1c18;
     --pico-color: #ece5d9;
     --pico-h1-color: #f4eee3;
@@ -106,3 +108,16 @@ body > footer { padding-top: 2rem; text-align: center; }
 }
 
 h1, h2, .brand { font-family: var(--pico-font-family-serif); font-weight: 600; }
+
+.vote svg {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.vote { display: inline-flex; align-items: center; gap: 0.35em; }
+.cover { font-family: var(--pico-font-family-serif); font-weight: 600; opacity: 0.9; }
