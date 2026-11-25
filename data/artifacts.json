@@ -10,7 +10,8 @@
     ],
     "created": "2026-11-25T15:00:00Z",
     "voters": [],
-    "downvoters": []
+    "downvoters": [],
+    "cover": false
   },
   {
     "id": "4d9134ff-7034-4ced-862a-13c0ccacd6f1",
@@ -23,7 +24,8 @@
     ],
     "created": "2026-11-25T15:00:00Z",
     "voters": [],
-    "downvoters": []
+    "downvoters": [],
+    "cover": false
   },
   {
     "id": "9aa361f5-f430-4576-ac09-bc636cf62f26",
@@ -35,6 +37,159 @@
     ],
     "created": "2026-11-25T15:00:00Z",
     "voters": [],
-    "downvoters": []
+    "downvoters": [],
+    "cover": false
+  },
+  {
+    "id": "07afd3e4-2596-47ef-bcec-dc643ad7d0a3",
+    "title": "Conway's Game of Life",
+    "description": "The classic cellular automaton, playable in the browser.",
+    "author": "community",
+    "tags": [
+      "game",
+      "simulation"
+    ],
+    "created": "2026-11-25T17:00:00Z",
+    "voters": [],
+    "downvoters": [],
+    "cover": false
+  },
+  {
+    "id": "f41d521c-f502-4477-a8da-4e0126444fd9",
+    "title": "Empire Tactics",
+    "description": "A turn-based strategy game.",
+    "author": "community",
+    "tags": [
+      "game",
+      "strategy"
+    ],
+    "created": "2026-11-25T17:00:00Z",
+    "voters": [],
+    "downvoters": [],
+    "cover": false
+  },
+  {
+    "id": "3ed78cbf-a139-439f-937f-5dd5ab90bfa0",
+    "title": "Endless Space Shooter",
+    "description": "An arcade shooter that never ends.",
+    "author": "community",
+    "tags": [
+      "game"
+    ],
+    "created": "2026-11-25T17:00:00Z",
+    "voters": [],
+    "downvoters": [],
+    "cover": false
+  },
+  {
+    "id": "590d0d2a-da07-4a08-9c83-2d3d11b4f63f",
+    "title": "SpaceX Starship Lander",
+    "description": "Land the Starship without crashing.",
+    "author": "community",
+    "tags": [
+      "game",
+      "space"
+    ],
+    "created": "2026-11-25T17:00:00Z",
+    "voters": [],
+    "downvoters": [],
+    "cover": false
+  },
+  {
+    "id": "cd452263-d93a-4506-94b6-6dcb9681512f",
+    "title": "Stock Option Call Analyzer",
+    "description": "Analyze call options and their payoff.",
+    "author": "community",
+    "tags": [
+      "tool",
+      "finance"
+    ],
+    "created": "2026-11-25T17:00:00Z",
+    "voters": [],
+    "downvoters": [],
+    "cover": false
+  },
+  {
+    "id": "3cc31ada-ae41-4ed9-9325-de7a659643a9",
+    "title": "Understanding Databases",
+    "description": "An interactive introduction to how databases work.",
+    "author": "community",
+    "tags": [
+      "learn",
+      "programming"
+    ],
+    "created": "2026-11-25T17:00:00Z",
+    "voters": [],
+    "downvoters": [],
+    "cover": false
+  },
+  {
+    "id": "0cc41187-023b-455d-b25d-585be3778ebc",
+    "title": "Worms-like Game",
+    "description": "An artillery game in the style of Worms.",
+    "author": "community",
+    "tags": [
+      "game"
+    ],
+    "created": "2026-11-25T17:00:00Z",
+    "voters": [],
+    "downvoters": [],
+    "cover": false
+  },
+  {
+    "id": "5dcd7214-289c-499f-9cf3-4ea6bf34eadb",
+    "title": "3D Game with Physics",
+    "description": "A 3D physics game made in a few prompts.",
+    "author": "community",
+    "tags": [
+      "game",
+      "3d"
+    ],
+    "created": "2026-11-25T17:00:00Z",
+    "voters": [],
+    "downvoters": [],
+    "cover": false
+  },
+  {
+    "id": "5a0d58eb-718b-4cf7-a047-d223940702a4",
+    "title": "Double Pendulum Simulator",
+    "description": "Switch between regular and chaotic motion by changing the starting angle.",
+    "author": "community",
+    "tags": [
+      "learn",
+      "simulation"
+    ],
+    "created": "2026-11-25T17:00:00Z",
+    "voters": [],
+    "downvoters": [],
+    "cover": false
+  },
+  {
+    "id": "f829f1ea-a5f1-4459-b447-975fb39d0c19",
+    "title": "Job Search Assistant",
+    "description": "A small CRM for keeping track of a job search.",
+    "author": "community",
+    "tags": [
+      "tool",
+      "productivity"
+    ],
+    "created": "2026-11-25T17:00:00Z",
+    "voters": [],
+    "downvoters": [],
+    "cover": false
+  },
+  {
+    "id": "258b3fdd-b4b6-4521-b408-973f7a56907a",
+    "title": "Photo to 3D Video Effect",
+    "description": "Turn a photo into a real-time 3D video effect.",
+    "author": "community",
+    "tags": [
+      "creative",
+      "tool"
+    ],
+    "created": "2026-11-25T17:00:00Z",
+    "voters": [],
+    "downvoters": [],
+    "cover": false
   }
 ]

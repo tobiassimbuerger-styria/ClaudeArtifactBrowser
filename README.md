@@ -39,7 +39,8 @@ Posting and voting need the deployed worker.
 ## Moderation
 
 Edit `data/artifacts.json` and push. Entries look like this; `id` is the last part of
-`https://claude.ai/artifact/<id>` or `https://claude.ai/public/artifacts/<id>`, `voters` and `downvoters` hold salted hashes of Google account ids.
+`https://claude.ai/artifact/<id>` or `https://claude.ai/public/artifacts/<id>`, `voters` and `downvoters` hold salted hashes of Google account ids,
+`cover` says whether `data/covers/<id>.jpg` exists.
 
 ```json
 {
@@ -50,7 +51,8 @@ Edit `data/artifacts.json` and push. Entries look like this; `id` is the last pa
   "tags": ["tool", "productivity"],
   "created": "2026-11-25T10:00:00Z",
   "voters": [],
-  "downvoters": []
+  "downvoters": [],
+  "cover": false
 }
 ```
 

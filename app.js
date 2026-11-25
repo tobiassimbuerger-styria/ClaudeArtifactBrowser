@@ -7,6 +7,8 @@ const launchUrl = (id) => `https://claude.ai/${UUID.test(id) ? "public/artifacts
 const ARTIFACT_PATH = /\/a\/([0-9A-Za-z-]{16,36})\/?$/;
 const HOUR_MS = 36e5;
 const HOME = new URL(document.baseURI).pathname;
+const COVER_WIDTH = 640;
+const COVER_HEIGHT = 360;
 const TAG_ICONS = { game: "🎮", tool: "🛠️", programming: "💻", learn: "📚", creative: "🎨", data: "📊", fun: "🎉" };
 
 const score = (a) => a.voters.length - a.downvoters.length;
@@ -51,11 +53,38 @@ async function api(route, body) {
   return true;
 }
 
-// Claude offers no preview images, so each artifact gets a stable generated cover instead.
-function paintCover(node, a) {
+// Artifacts without an uploaded screenshot get a stable generated cover.
+function paintGeneratedCover(node, a) {
   const hue = [...a.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 360;
   node.style.setProperty("--hue", hue);
-  node.textContent = TAG_ICONS[a.tags.find((t) => TAG_ICONS[t])] ?? a.title[0].toUpperCase();
+  node.replaceChildren(TAG_ICONS[a.tags.find((t) => TAG_ICONS[t])] ?? a.title[0].toUpperCase());
+}
+
+function paintCover(node, a) {
+  if (!a.cover) {
+    paintGeneratedCover(node, a);
+    return;
+  }
+  const image = new Image();
+  image.alt = `Screenshot of ${a.title}`;
+  image.loading = "lazy";
+  // A fresh upload is not on the site until the next build.
+  image.onerror = () => paintGeneratedCover(node, a);
+  image.src = `data/covers/${a.id}.jpg`;
+  node.replaceChildren(image);
+}
+
+/** Crops the picture to the cover format and returns it as base64 JPEG. */
+async function coverData(file) {
+  const bitmap = await createImageBitmap(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = COVER_WIDTH;
+  canvas.height = COVER_HEIGHT;
+  const scale = Math.max(COVER_WIDTH / bitmap.width, COVER_HEIGHT / bitmap.height);
+  const width = bitmap.width * scale;
+  const height = bitmap.height * scale;
+  canvas.getContext("2d").drawImage(bitmap, (COVER_WIDTH - width) / 2, 0, width, height);
+  return canvas.toDataURL("image/jpeg", 0.8).split(",")[1];
 }
 
 function voteButton(a, value, label) {
@@ -132,6 +161,7 @@ $("submit-form").onsubmit = async (event) => {
   const form = new FormData(event.target);
   const tags = form.get("tags").split(",").map((t) => t.trim().toLowerCase()).filter(Boolean);
   const body = { url: form.get("url"), title: form.get("title"), description: form.get("description"), tags };
+  if (form.get("cover").size > 0) body.cover = await coverData(form.get("cover"));
   if (await api("submit", body)) {
     event.target.reset();
     $("submit").close();

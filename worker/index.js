@@ -3,6 +3,9 @@ const TAG = /^[a-z0-9-]{1,20}$/;
 const MAX_TITLE = 80;
 const MAX_DESCRIPTION = 200;
 const MAX_TAGS = 5;
+// Base64 length; the site downsizes screenshots far below this before uploading.
+const MAX_COVER = 300_000;
+const JPEG_BASE64 = /^\/9j\/[A-Za-z0-9+/]+=*$/;
 const WRITE_ATTEMPTS = 3;
 
 class HttpError extends Error {
@@ -23,7 +26,7 @@ async function verify(request, env) {
   return { voter, name: claims.given_name ?? "anonymous" };
 }
 
-function submit(list, user, { url, title, description = "", tags }) {
+function submit(list, user, { url, title, description = "", tags, cover }) {
   const match = typeof url === "string" && ARTIFACT_URL.exec(url);
   const id = match && (match[1] ?? match[2]);
   if (!id) throw new HttpError(400, "Not a public Claude artifact link");
@@ -32,6 +35,9 @@ function submit(list, user, { url, title, description = "", tags }) {
   }
   if (typeof description !== "string" || description.length > MAX_DESCRIPTION) {
     throw new HttpError(400, `Description must have at most ${MAX_DESCRIPTION} characters`);
+  }
+  if (cover !== undefined && (typeof cover !== "string" || cover.length > MAX_COVER || !JPEG_BASE64.test(cover))) {
+    throw new HttpError(400, "Screenshot must be a small JPEG image");
   }
   if (!Array.isArray(tags) || tags.length > MAX_TAGS || !tags.every((t) => typeof t === "string" && TAG.test(t))) {
     throw new HttpError(400, `Up to ${MAX_TAGS} tags, lowercase letters, digits and dashes only`);
@@ -46,6 +52,7 @@ function submit(list, user, { url, title, description = "", tags }) {
     created: new Date().toISOString(),
     voters: [user.voter],
     downvoters: [],
+    cover: cover !== undefined,
   });
   return `Add artifact ${id}`;
 }
@@ -71,14 +78,26 @@ function encode(text) {
   return btoa(binary);
 }
 
+const dataUrl = (env, path) => `https://api.github.com/repos/${env.GITHUB_REPO}/contents/data/${path}`;
+const githubHeaders = (env) => ({
+  Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+  Accept: "application/vnd.github+json",
+  "User-Agent": "lesezeichen-worker",
+});
+
+async function saveCover(env, id, content) {
+  const write = await fetch(dataUrl(env, `covers/${id}.jpg`), {
+    method: "PUT",
+    headers: githubHeaders(env),
+    body: JSON.stringify({ message: `Add cover for artifact ${id}`, content }),
+  });
+  if (!write.ok) throw new Error(`GitHub cover write failed: ${write.status}`);
+}
+
 /** Applies `mutate` to the artifact list in the repo; retries when a concurrent write wins. */
 async function update(env, mutate) {
-  const url = `https://api.github.com/repos/${env.GITHUB_REPO}/contents/data/artifacts.json`;
-  const headers = {
-    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
-    Accept: "application/vnd.github+json",
-    "User-Agent": "lesezeichen-worker",
-  };
+  const url = dataUrl(env, "artifacts.json");
+  const headers = githubHeaders(env);
   for (let attempt = 0; attempt < WRITE_ATTEMPTS; attempt++) {
     const read = await fetch(url, { headers });
     if (!read.ok) throw new Error(`GitHub read failed: ${read.status}`);
@@ -108,6 +127,8 @@ export default {
       const user = await verify(request, env);
       const body = await request.json();
       const list = await update(env, (artifacts) => action(artifacts, user, body));
+      // Saved after the entry so a rejected or duplicate post never leaves an orphaned image.
+      if (action === submit && body.cover) await saveCover(env, list.at(-1).id, body.cover);
       return Response.json(list, { headers: cors });
     } catch (error) {
       if (!(error instanceof HttpError)) console.error(error);

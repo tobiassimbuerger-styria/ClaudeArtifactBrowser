@@ -55,3 +55,54 @@ dialog footer { display: flex; justify-content: flex-end; gap: 0.5rem; }
 dialog footer button, dialog footer [role="button"] { width: auto; margin: 0; }
 
 body > footer { padding-top: 2rem; text-align: center; }
+
+.cover img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.cover { overflow: hidden; }
+
+/* Warm paper palette in the spirit of Claude's look, with our own colours and system fonts only. */
+:root:not([data-theme]) {
+  --pico-font-family-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --pico-background-color: #f6f1e7;
+  --pico-color: #2c2620;
+  --pico-h1-color: #2c2620;
+  --pico-h2-color: #2c2620;
+  --pico-muted-color: #736a5d;
+  --pico-muted-border-color: #e2d9c8;
+  --pico-card-background-color: #fffcf6;
+  --pico-card-sectioning-background-color: #fffcf6;
+  --pico-form-element-background-color: #fffcf6;
+  --pico-form-element-border-color: #d8cdb9;
+  --pico-primary: #a84a22;
+  --pico-primary-hover: #8a3b19;
+  --pico-primary-underline: #a84a2266;
+  --pico-primary-background: #b4532a;
+  --pico-primary-border: #b4532a;
+  --pico-primary-hover-background: #96421f;
+  --pico-primary-hover-border: #96421f;
+  --pico-primary-focus: #b4532a40;
+  --pico-primary-inverse: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --pico-background-color: #1f1c18;
+    --pico-color: #ece5d9;
+    --pico-h1-color: #f4eee3;
+    --pico-h2-color: #f4eee3;
+    --pico-muted-color: #a69c8d;
+    --pico-muted-border-color: #3a352e;
+    --pico-card-background-color: #2a2621;
+    --pico-card-sectioning-background-color: #2a2621;
+    --pico-form-element-background-color: #2a2621;
+    --pico-form-element-border-color: #453f36;
+    --pico-primary: #e39468;
+    --pico-primary-hover: #efae8a;
+    --pico-primary-underline: #e3946866;
+    --pico-primary-background: #c4633a;
+    --pico-primary-border: #c4633a;
+    --pico-primary-hover-background: #d47548;
+    --pico-primary-hover-border: #d47548;
+  }
+}
+
+h1, h2, .brand { font-family: var(--pico-font-family-serif); font-weight: 600; }
