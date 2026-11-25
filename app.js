@@ -6,6 +6,7 @@ const UUID = /^[0-9a-f-]{36}$/;
 const launchUrl = (id) => `https://claude.ai/${UUID.test(id) ? "public/artifacts" : "artifact"}/${id}`;
 const ARTIFACT_PATH = /\/a\/([0-9A-Za-z-]{16,36})\/?$/;
 const HOUR_MS = 36e5;
+const REPO_URL = "https://github.com/tobiassimbuerger-styria/ClaudeArtifactBrowser";
 const HOME = new URL(document.baseURI).pathname;
 const COVER_WIDTH = 640;
 const COVER_HEIGHT = 360;
@@ -103,13 +104,22 @@ function card(a) {
     window.open(launchUrl(a.id), "_blank", "noopener");
   };
   const actions = el("div", "card-actions", "");
-  actions.append(voteButton(a, 1, `👍 ${a.voters.length}`), voteButton(a, -1, "👎"), el("small", "", `by ${a.author}`));
+  const share = el("button", "vote outline secondary", "Share");
+  share.onclick = async () => {
+    await navigator.clipboard.writeText(link.href);
+    share.textContent = "Copied";
+  };
+  const report = el("a", "report", "Report");
+  report.href = `${REPO_URL}/issues/new?title=${encodeURIComponent(`Report artifact ${a.id}`)}`;
+  report.target = "_blank";
+  report.rel = "noopener";
+  actions.append(voteButton(a, 1, `👍 ${a.voters.length}`), voteButton(a, -1, "👎"), share, report);
   const node = el("article", "card", "");
   node.append(
     cover,
     link,
     el("p", "description", a.description),
-    el("small", "", a.tags.map((t) => `#${t}`).join(" ")),
+    el("small", "", `${a.tags.map((t) => `#${t}`).join(" ")} · by ${a.author}`),
     actions,
   );
   return node;

@@ -47,7 +47,7 @@
 .description { flex: 1; margin: 0; color: var(--pico-muted-color); font-size: 0.9rem; }
 
 .card-actions { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
-.card-actions small { margin-left: auto; color: var(--pico-muted-color); }
+.report { position: relative; margin-left: auto; color: var(--pico-muted-color); font-size: 0.8rem; }
 .vote { position: relative; width: auto; margin: 0; padding: 0.2rem 0.7rem; font-size: 0.9rem; }
 
 dialog .cover { margin: calc(var(--pico-block-spacing-vertical) * -1) calc(var(--pico-block-spacing-horizontal) * -1) 1rem; }

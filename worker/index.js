@@ -1,4 +1,6 @@
-const ARTIFACT_URL = /^https:\/\/claude\.ai\/(?:public\/artifacts\/([0-9a-f-]{36})|artifact\/([0-9A-Za-z]{16,32}))(?:[/?#]|$)/;
+// claude.site/artifacts is the retired public link form; it redirects to claude.ai/public/artifacts.
+const ARTIFACT_URL =
+  /^https:\/\/(?:claude\.(?:ai\/public|site)\/artifacts\/([0-9a-f-]{36})|claude\.ai\/artifact\/([0-9A-Za-z]{16,32}))(?:[/?#]|$)/;
 const TAG = /^[a-z0-9-]{1,20}$/;
 const MAX_TITLE = 80;
 const MAX_DESCRIPTION = 200;
