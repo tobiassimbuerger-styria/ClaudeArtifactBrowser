@@ -26,12 +26,11 @@
     <p id="empty" hidden>No artifacts found.</p>
   </main>
   <dialog id="viewer">
-    <div class="bar">
-      <strong id="viewer-title"></strong>
-      <a id="viewer-link" target="_blank" rel="noopener">Open on claude.ai</a>
-      <button id="viewer-close" aria-label="Close">✕</button>
+    <h2 id="viewer-title"></h2>
+    <div class="actions">
+      <button id="viewer-close">Browse all</button>
+      <a id="viewer-link" target="_blank" rel="noopener">Launch on claude.ai</a>
     </div>
-    <iframe id="viewer-frame" title="Artifact" allow="clipboard-write"></iframe>
   </dialog>
   <dialog id="submit">
     <form id="submit-form">

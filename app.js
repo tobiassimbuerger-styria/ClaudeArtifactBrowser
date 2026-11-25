@@ -1,6 +1,8 @@
 import { API_URL, GOOGLE_CLIENT_ID } from "./config.js";
 
 const ARTIFACT_ID = /^[0-9a-f-]{36}$/;
+// Claude forbids framing its artifact pages on other sites, so artifacts launch in a new tab.
+const launchUrl = (id) => `https://claude.ai/public/artifacts/${id}`;
 const ARTIFACT_PATH = /\/a\/([0-9a-f-]{36})\/?$/;
 const HOUR_MS = 36e5;
 const HOME = new URL(document.baseURI).pathname;
@@ -46,17 +48,12 @@ async function api(route, body) {
   return true;
 }
 
-function navigate(path) {
-  history.pushState(null, "", path);
-  syncViewer();
-}
-
 function card(a) {
   const link = el("a", "title", a.title);
   link.href = `a/${a.id}/`;
   link.onclick = (event) => {
     event.preventDefault();
-    navigate(link.href);
+    window.open(launchUrl(a.id), "_blank", "noopener");
   };
   const vote = el("button", "vote", `▲ ${a.voters.length}`);
   vote.onclick = () => api("vote", { id: a.id });
@@ -90,8 +87,7 @@ function syncViewer() {
     return;
   }
   $("viewer-title").textContent = artifact.title;
-  $("viewer-link").href = `https://claude.ai/public/artifacts/${artifact.id}`;
-  $("viewer-frame").src = `https://claude.site/public/artifacts/${artifact.id}/embed`;
+  $("viewer-link").href = launchUrl(artifact.id);
   if (!$("viewer").open) $("viewer").showModal();
 }
 
@@ -99,8 +95,7 @@ $("search").oninput = render;
 $("sort").onchange = render;
 $("viewer-close").onclick = () => $("viewer").close();
 $("viewer").onclose = () => {
-  $("viewer-frame").src = "about:blank";
-  if (ARTIFACT_PATH.test(location.pathname)) navigate(HOME);
+  if (ARTIFACT_PATH.test(location.pathname)) history.pushState(null, "", HOME);
 };
 window.onpopstate = syncViewer;
 
@@ -117,7 +112,7 @@ $("submit-form").onsubmit = async (event) => {
 };
 
 const response = await fetch("data/artifacts.json");
-// The id ends up in an iframe URL, so anything that is not a plain artifact id is dropped.
+// The id ends up in a link URL, so anything that is not a plain artifact id is dropped.
 artifacts = (await response.json()).filter((a) => ARTIFACT_ID.test(a.id));
 render();
 syncViewer();

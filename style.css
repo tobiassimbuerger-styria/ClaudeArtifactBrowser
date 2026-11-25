@@ -88,41 +88,22 @@ nav { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .vote:hover, #submit-open:hover { border-color: var(--accent); }
 
-#submit {
+dialog {
   width: min(420px, calc(100vw - 32px));
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
 }
 
-#submit h2 { margin: 0 0 12px; font-size: 1.1rem; }
+dialog h2 { margin: 0 0 12px; font-size: 1.1rem; }
 #submit label { display: block; margin-bottom: 12px; font-size: 0.875rem; }
 #submit input { display: block; width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 8px; }
 .actions { display: flex; justify-content: flex-end; gap: 8px; }
 
-#viewer {
-  width: 100vw;
-  height: 100vh;
-  max-width: none;
-  max-height: none;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: var(--bg);
+#viewer-link {
+  padding: 4px 12px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
 }
-
-#viewer[open] { display: flex; flex-direction: column; }
-
-.bar {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.bar strong { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar a { color: var(--accent); }
-.bar button { border: 0; background: none; font-size: 1.2rem; cursor: pointer; }
-
-#viewer-frame { flex: 1; width: 100%; border: 0; }
