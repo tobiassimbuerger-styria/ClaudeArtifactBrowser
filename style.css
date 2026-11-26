@@ -121,3 +121,16 @@ h1, h2, .brand { font-family: var(--pico-font-family-serif); font-weight: 600; }
 }
 .vote { display: inline-flex; align-items: center; gap: 0.35em; }
 .cover { font-family: var(--pico-font-family-serif); font-weight: 600; opacity: 0.9; }
+
+#notice {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  z-index: 1000;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.6rem 1rem;
+  border-radius: var(--pico-border-radius);
+  background: var(--pico-color);
+  color: var(--pico-background-color);
+}

@@ -74,6 +74,7 @@ function submit(list, user, { url, title, description = "", tags, cover }) {
     title: title.trim(),
     description: description.trim(),
     author: user.name,
+    owner: user.voter,
     tags,
     created: new Date().toISOString(),
     voters: [user.voter],
@@ -94,6 +95,14 @@ function vote(list, user, { id, value }) {
   artifact.downvoters = artifact.downvoters.filter((v) => v !== user.voter);
   if (!repeated) artifact[chosen].push(user.voter);
   return `Vote on artifact ${id}`;
+}
+
+function remove(list, user, { id }) {
+  const index = list.findIndex((a) => a.id === id);
+  if (index === -1) throw new HttpError(404, "Unknown artifact");
+  if (list[index].owner !== user.voter) throw new HttpError(403, "You can only delete your own posts");
+  list.splice(index, 1);
+  return `Delete artifact ${id}`;
 }
 
 const decode = (base64) => new TextDecoder().decode(Uint8Array.from(atob(base64), (c) => c.charCodeAt(0)));
@@ -127,6 +136,19 @@ async function readList(env) {
   return { list: JSON.parse(decode(file.content)), sha: file.sha };
 }
 
+async function deleteCover(env, id) {
+  const url = dataUrl(env, `covers/${id}.jpg`);
+  const read = await fetch(url, { headers: githubHeaders(env) });
+  if (read.status === 404) return;
+  const { sha } = await read.json();
+  const erase = await fetch(url, {
+    method: "DELETE",
+    headers: githubHeaders(env),
+    body: JSON.stringify({ message: `Delete cover for artifact ${id}`, sha }),
+  });
+  if (!erase.ok) throw new Error(`GitHub cover delete failed: ${erase.status}`);
+}
+
 /** Applies `mutate` to the artifact list in the repo; retries when a concurrent write wins. */
 async function update(env, mutate) {
   for (let attempt = 0; attempt < WRITE_ATTEMPTS; attempt++) {
@@ -144,7 +166,7 @@ async function update(env, mutate) {
   throw new HttpError(503, "Busy, please try again");
 }
 
-const ROUTES = { "/submit": submit, "/vote": vote };
+const ROUTES = { "/submit": submit, "/vote": vote, "/delete": remove };
 
 export default {
   async fetch(request, env) {
@@ -169,6 +191,7 @@ export default {
       const list = await update(env, (artifacts) => action(artifacts, user, body));
       // Saved after the entry so a rejected or duplicate post never leaves an orphaned image.
       if (action === submit && body.cover) await saveCover(env, list.at(-1).id, body.cover);
+      if (action === remove) await deleteCover(env, body.id);
       return Response.json(list, { headers: cors });
     } catch (error) {
       if (!(error instanceof HttpError)) console.error(error);

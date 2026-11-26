@@ -41,6 +41,7 @@ Posting and voting need the deployed worker.
 
 Edit `data/artifacts.json` and push. Entries look like this; `id` is the last part of
 `https://claude.ai/artifact/<id>` or `https://claude.ai/public/artifacts/<id>`, `voters` and `downvoters` hold salted hashes of Google account ids,
+`owner` is the poster's hash (they may delete the entry),
 `cover` says whether `data/covers/<id>.jpg` exists.
 
 ```json
@@ -49,6 +50,7 @@ Edit `data/artifacts.json` and push. Entries look like this; `id` is the last pa
   "title": "Pomodoro timer",
   "description": "A simple focus timer.",
   "author": "someone",
+  "owner": null,
   "tags": ["tool", "productivity"],
   "created": "2026-11-25T10:00:00Z",
   "voters": [],

@@ -8,6 +8,7 @@ const ARTIFACT_PATH = /\/a\/([0-9A-Za-z-]{16,36})\/?$/;
 const TAG_PATH = new RegExp("/t/([a-z0-9-]{1,20})/?$");
 const HOUR_MS = 36e5;
 const SESSION_STORAGE = "session";
+const NOTICE_MS = 5000;
 const REPO_URL = "https://github.com/tobiassimbuerger-styria/ClaudeArtifactBrowser";
 const HOME = new URL(document.baseURI).pathname;
 const COVER_WIDTH = 640;
@@ -40,11 +41,26 @@ let artifacts = [];
 const tagFromPath = () => TAG_PATH.exec(location.pathname)?.[1] ?? null;
 let activeTag = tagFromPath();
 let token = localStorage.getItem(SESSION_STORAGE);
+// The signed-in user's vote id, used to mark their own votes and posts.
+let me = null;
+
+function notify(message) {
+  $("notice").textContent = message;
+  $("notice").hidden = false;
+  setTimeout(() => { $("notice").hidden = true; }, NOTICE_MS);
+}
 
 function setSession(newToken) {
   token = newToken;
+  try {
+    me = token ? JSON.parse(atob(token.split(".")[0])).voter : null;
+  } catch {
+    token = null;
+    me = null;
+  }
   if (token) localStorage.setItem(SESSION_STORAGE, token);
   else localStorage.removeItem(SESSION_STORAGE);
+  if (artifacts.length > 0) render();
   $("signin").hidden = Boolean(token);
   $("submit-open").hidden = !token;
   $("signout").hidden = !token;
@@ -63,7 +79,7 @@ async function api(route, body) {
   const result = await response.json();
   if (response.status === 401) setSession(null);
   if (!response.ok) {
-    alert(result.error);
+    notify(result.error);
     return false;
   }
   artifacts = result;
@@ -106,7 +122,8 @@ async function coverData(file) {
 }
 
 function voteButton(a, value, count) {
-  const button = el("button", "vote outline secondary", "");
+  const mine = a[value === 1 ? "voters" : "downvoters"].includes(me);
+  const button = el("button", mine ? "vote" : "vote outline secondary", "");
   button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${THUMB_PATHS[value]}"/></svg>`;
   button.append(count);
   button.ariaLabel = value === 1 ? "Thumbs up" : "Thumbs down";
@@ -133,7 +150,13 @@ function card(a) {
   report.href = `${REPO_URL}/issues/new?title=${encodeURIComponent(`Report artifact ${a.id}`)}`;
   report.target = "_blank";
   report.rel = "noopener";
-  actions.append(voteButton(a, 1, a.voters.length), voteButton(a, -1, ""), share, report);
+  actions.append(voteButton(a, 1, a.voters.length), voteButton(a, -1, ""), share);
+  if (a.owner === me) {
+    const remove = el("button", "vote outline secondary", "Delete");
+    remove.onclick = () => confirm(`Delete "${a.title}"?`) && api("delete", { id: a.id });
+    actions.append(remove);
+  }
+  actions.append(report);
   const node = el("article", "card", "");
   node.append(
     cover,
@@ -200,7 +223,12 @@ $("submit-form").onsubmit = async (event) => {
   const tags = form.get("tags").split(",").map((t) => t.trim().toLowerCase()).filter(Boolean);
   const body = { url: form.get("url"), title: form.get("title"), description: form.get("description"), tags };
   if (form.get("cover").size > 0) body.cover = await coverData(form.get("cover"));
-  if (await api("submit", body)) {
+  $("submit-send").ariaBusy = "true";
+  $("submit-send").disabled = true;
+  const posted = await api("submit", body);
+  $("submit-send").ariaBusy = "false";
+  $("submit-send").disabled = false;
+  if (posted) {
     event.target.reset();
     $("submit").close();
   }
@@ -228,7 +256,7 @@ if (globalThis.google && GOOGLE_CLIENT_ID) {
     callback: async ({ credential }) => {
       const login = await fetch(`${API_URL}/login`, { method: "POST", headers: { Authorization: `Bearer ${credential}` } });
       if (login.ok) setSession((await login.json()).token);
-      else alert("Sign-in failed, please try again");
+      else notify("Sign-in failed, please try again");
     },
   });
   google.accounts.id.renderButton($("signin"), { theme: "outline", size: "large" });
