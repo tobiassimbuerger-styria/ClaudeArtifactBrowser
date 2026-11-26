@@ -7,6 +7,7 @@ const launchUrl = (id) => `https://claude.ai/${UUID.test(id) ? "public/artifacts
 const ARTIFACT_PATH = /\/a\/([0-9A-Za-z-]{16,36})\/?$/;
 const TAG_PATH = new RegExp("/t/([a-z0-9-]{1,20})/?$");
 const HOUR_MS = 36e5;
+const SESSION_STORAGE = "session";
 const REPO_URL = "https://github.com/tobiassimbuerger-styria/ClaudeArtifactBrowser";
 const HOME = new URL(document.baseURI).pathname;
 const COVER_WIDTH = 640;
@@ -38,7 +39,16 @@ const el = (tag, className, text) => {
 let artifacts = [];
 const tagFromPath = () => TAG_PATH.exec(location.pathname)?.[1] ?? null;
 let activeTag = tagFromPath();
-let token = null;
+let token = localStorage.getItem(SESSION_STORAGE);
+
+function setSession(newToken) {
+  token = newToken;
+  if (token) localStorage.setItem(SESSION_STORAGE, token);
+  else localStorage.removeItem(SESSION_STORAGE);
+  $("signin").hidden = Boolean(token);
+  $("submit-open").hidden = !token;
+  $("signout").hidden = !token;
+}
 
 async function api(route, body) {
   if (!token) {
@@ -51,6 +61,7 @@ async function api(route, body) {
     body: JSON.stringify(body),
   });
   const result = await response.json();
+  if (response.status === 401) setSession(null);
   if (!response.ok) {
     alert(result.error);
     return false;
@@ -75,9 +86,9 @@ function paintCover(node, a) {
   const image = new Image();
   image.alt = `Screenshot of ${a.title}`;
   image.loading = "lazy";
-  // A fresh upload is not on the site until the next build.
   image.onerror = () => paintGeneratedCover(node, a);
-  image.src = `data/covers/${a.id}.jpg`;
+  // Read from the repository: the site's own copy only appears with the next build.
+  image.src = `${REPO_URL.replace("github.com", "raw.githubusercontent.com")}/main/data/covers/${a.id}.jpg`;
   node.replaceChildren(image);
 }
 
@@ -195,7 +206,16 @@ $("submit-form").onsubmit = async (event) => {
   }
 };
 
-const response = await fetch("data/artifacts.json");
+$("signout").onclick = () => {
+  globalThis.google?.accounts.id.disableAutoSelect();
+  setSession(null);
+};
+setSession(token);
+
+// The worker has the current list; the static copy is the fallback when the worker is unreachable.
+const response = await fetch(`${API_URL}/artifacts`)
+  .then((live) => (live.ok ? live : Promise.reject(new Error("worker unavailable"))))
+  .catch(() => fetch("data/artifacts.json"));
 // The id ends up in a link URL, so anything that is not a plain artifact id is dropped.
 artifacts = (await response.json()).filter((a) => ARTIFACT_ID.test(a.id));
 render();
@@ -205,11 +225,10 @@ syncViewer();
 if (globalThis.google && GOOGLE_CLIENT_ID) {
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
-    auto_select: true,
-    callback: ({ credential }) => {
-      token = credential;
-      $("signin").hidden = true;
-      $("submit-open").hidden = false;
+    callback: async ({ credential }) => {
+      const login = await fetch(`${API_URL}/login`, { method: "POST", headers: { Authorization: `Bearer ${credential}` } });
+      if (login.ok) setSession((await login.json()).token);
+      else alert("Sign-in failed, please try again");
     },
   });
   google.accounts.id.renderButton($("signin"), { theme: "outline", size: "large" });

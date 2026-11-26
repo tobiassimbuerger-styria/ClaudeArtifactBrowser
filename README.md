@@ -28,6 +28,7 @@ Posting and voting need the deployed worker.
    npx wrangler login
    npx wrangler secret put GITHUB_TOKEN
    npx wrangler secret put VOTER_SALT   # any long random string; changing it resets who voted
+   npx wrangler secret put SESSION_KEY  # any long random string; changing it signs everyone out
    npx wrangler deploy
    ```
 

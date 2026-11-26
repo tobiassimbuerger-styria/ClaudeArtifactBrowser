@@ -1,7 +1,7 @@
 /* Layered on top of Pico CSS, which provides typography, forms, buttons, dialogs and the dark theme. */
 
 .brand { font-weight: 700; font-size: 1.2rem; text-decoration: none; }
-#submit-open { margin: 0; }
+#submit-open, #signout { margin: 0; }
 
 .hero { padding: 1.5rem 0 0.5rem; text-align: center; }
 .hero h1 { margin-bottom: 0.5rem; }
