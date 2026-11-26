@@ -12,7 +12,7 @@
 
 #grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.25rem;
 }
 
@@ -46,9 +46,48 @@
 
 .description { flex: 1; margin: 0; color: var(--pico-muted-color); font-size: 0.9rem; }
 
-.card-actions { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
-.report { position: relative; margin-left: auto; color: var(--pico-muted-color); font-size: 0.8rem; }
-.vote { position: relative; width: auto; margin: 0; padding: 0.2rem 0.7rem; font-size: 0.9rem; }
+.meta { color: var(--pico-muted-color); }
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin: 0.6rem -0.4rem -0.4rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--pico-muted-border-color);
+}
+
+.icon-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  width: auto;
+  margin: 0;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  box-shadow: none;
+  color: var(--pico-muted-color);
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.icon-button:hover { background: var(--pico-muted-border-color); color: var(--pico-color); }
+.icon-button.active { color: var(--pico-primary); }
+.icon-button.active svg { fill: color-mix(in srgb, currentColor 25%, transparent); }
+.icon-button.push { margin-left: auto; }
+
+.icon-button svg {
+  width: 1.1em;
+  height: 1.1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
 dialog .cover { margin: calc(var(--pico-block-spacing-vertical) * -1) calc(var(--pico-block-spacing-horizontal) * -1) 1rem; }
 dialog footer { display: flex; justify-content: flex-end; gap: 0.5rem; }
@@ -109,17 +148,6 @@ body > footer { padding-top: 2rem; text-align: center; }
 
 h1, h2, .brand { font-family: var(--pico-font-family-serif); font-weight: 600; }
 
-.vote svg {
-  width: 1em;
-  height: 1em;
-  vertical-align: -0.125em;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.vote { display: inline-flex; align-items: center; gap: 0.35em; }
 .cover { font-family: var(--pico-font-family-serif); font-weight: 600; opacity: 0.9; }
 
 #notice {

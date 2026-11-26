@@ -14,9 +14,12 @@ const HOME = new URL(document.baseURI).pathname;
 const COVER_WIDTH = 640;
 const COVER_HEIGHT = 360;
 // Outline icons from Feather (MIT licence).
-const THUMB_PATHS = {
-  1: "M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3",
-  [-1]: "M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17",
+const ICONS = {
+  up: "M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3",
+  down: "M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17",
+  link: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
+  flag: "M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7",
+  trash: "M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
 };
 
 const score = (a) => a.voters.length - a.downvoters.length;
@@ -121,12 +124,19 @@ async function coverData(file) {
   return canvas.toDataURL("image/jpeg", 0.8).split(",")[1];
 }
 
-function voteButton(a, value, count) {
-  const mine = a[value === 1 ? "voters" : "downvoters"].includes(me);
-  const button = el("button", mine ? "vote" : "vote outline secondary", "");
-  button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${THUMB_PATHS[value]}"/></svg>`;
-  button.append(count);
-  button.ariaLabel = value === 1 ? "Thumbs up" : "Thumbs down";
+function iconButton(icon, label, text = "") {
+  const button = el("button", "icon-button", "");
+  button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[icon]}"/></svg>`;
+  button.append(text);
+  button.ariaLabel = label;
+  button.title = label;
+  return button;
+}
+
+function voteButton(a, value) {
+  const [list, icon, label] = value === 1 ? [a.voters, "up", "Thumbs up"] : [a.downvoters, "down", "Thumbs down"];
+  const button = iconButton(icon, label, value === 1 ? list.length : "");
+  button.classList.toggle("active", list.includes(me));
   button.onclick = () => api("vote", { id: a.id, value });
   return button;
 }
@@ -140,29 +150,30 @@ function card(a) {
     event.preventDefault();
     window.open(launchUrl(a.id), "_blank", "noopener");
   };
-  const actions = el("div", "card-actions", "");
-  const share = el("button", "vote outline secondary", "Share");
+  const share = iconButton("link", "Copy link");
+  share.classList.add("push");
   share.onclick = async () => {
     await navigator.clipboard.writeText(link.href);
-    share.textContent = "Copied";
+    notify("Link copied");
   };
-  const report = el("a", "report", "Report");
-  report.href = `${REPO_URL}/issues/new?title=${encodeURIComponent(`Report artifact ${a.id}`)}`;
-  report.target = "_blank";
-  report.rel = "noopener";
-  actions.append(voteButton(a, 1, a.voters.length), voteButton(a, -1, ""), share);
-  if (a.owner === me) {
-    const remove = el("button", "vote outline secondary", "Delete");
+  const report = iconButton("flag", "Report");
+  report.onclick = () => {
+    const title = encodeURIComponent(`Report artifact ${a.id}`);
+    window.open(`${REPO_URL}/issues/new?title=${title}`, "_blank", "noopener");
+  };
+  const actions = el("div", "card-actions", "");
+  actions.append(voteButton(a, 1), voteButton(a, -1), share, report);
+  if (me && a.owner === me) {
+    const remove = iconButton("trash", "Delete");
     remove.onclick = () => confirm(`Delete "${a.title}"?`) && api("delete", { id: a.id });
     actions.append(remove);
   }
-  actions.append(report);
   const node = el("article", "card", "");
   node.append(
     cover,
     link,
     el("p", "description", a.description),
-    el("small", "", `${a.tags.map((t) => `#${t}`).join(" ")} · by ${a.author}`),
+    el("small", "meta", [...a.tags.map((t) => `#${t}`), `by ${a.author}`].join(" · ")),
     actions,
   );
   return node;

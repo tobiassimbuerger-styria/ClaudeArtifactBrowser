@@ -32,6 +32,13 @@ npx serve dist
 
 Browsing works locally; signing in, posting and voting need a deployed worker (see below).
 
+The link check that keeps anything but Claude artifact links out has its own test, which also runs
+before every deployment:
+
+```sh
+node --test worker/artifact-url.test.mjs
+```
+
 ## Host your own copy
 
 The site is static and runs on GitHub Pages. A Cloudflare Worker checks the Google sign-in and stores

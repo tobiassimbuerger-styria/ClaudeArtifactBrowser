@@ -1,6 +1,5 @@
-// claude.site/artifacts is the retired public link form; it redirects to claude.ai/public/artifacts.
-const ARTIFACT_URL =
-  /^https:\/\/(?:claude\.(?:ai\/public|site)\/artifacts\/([0-9a-f-]{36})|claude\.ai\/artifact\/([0-9A-Za-z]{16,32}))(?:[/?#]|$)/;
+import { artifactId } from "./artifact-url.mjs";
+
 const TAG = /^[a-z0-9-]{1,20}$/;
 const MAX_TITLE = 80;
 const MAX_DESCRIPTION = 200;
@@ -53,8 +52,7 @@ async function verify(request, env) {
 }
 
 function submit(list, user, { url, title, description = "", tags, cover }) {
-  const match = typeof url === "string" && ARTIFACT_URL.exec(url);
-  const id = match && (match[1] ?? match[2]);
+  const id = artifactId(url);
   if (!id) throw new HttpError(400, "Not a public Claude artifact link");
   if (typeof title !== "string" || !title.trim() || title.length > MAX_TITLE) {
     throw new HttpError(400, `Title must have 1 to ${MAX_TITLE} characters`);
