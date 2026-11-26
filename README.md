@@ -14,7 +14,7 @@ Unofficial community project, not affiliated with Anthropic.
   `https://claude.ai/artifact/…` or `https://claude.ai/public/artifacts/…`. The artifact must be
   shared publicly in Claude, otherwise visitors cannot open it. A screenshot is optional.
 - **Vote:** thumbs up or down, one vote per account. Clicking the same thumb again takes the vote back.
-- **Delete:** your own posts have a *Delete* button.
+- **Edit or delete:** your own posts have *Edit* and *Delete* buttons.
 - **Report:** every card has a *Report* link that opens an issue in this repository.
 
 What is stored about you is described on the site's

@@ -19,6 +19,7 @@ const ICONS = {
   down: "M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17",
   link: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
   flag: "M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7",
+  edit: "M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z",
   trash: "M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
 };
 
@@ -46,6 +47,8 @@ let activeTag = tagFromPath();
 let token = localStorage.getItem(SESSION_STORAGE);
 // The signed-in user's vote id, used to mark their own votes and posts.
 let me = null;
+// The artifact the form is editing, or null while it creates a new post.
+let editing = null;
 
 function notify(message) {
   $("notice").textContent = message;
@@ -164,9 +167,11 @@ function card(a) {
   const actions = el("div", "card-actions", "");
   actions.append(voteButton(a, 1), voteButton(a, -1), share, report);
   if (me && a.owner === me) {
+    const change = iconButton("edit", "Edit");
+    change.onclick = () => openForm(a);
     const remove = iconButton("trash", "Delete");
     remove.onclick = () => confirm(`Delete "${a.title}"?`) && api("delete", { id: a.id });
-    actions.append(remove);
+    actions.append(change, remove);
   }
   const node = el("article", "card", "");
   node.append(
@@ -226,17 +231,38 @@ window.onpopstate = () => {
   syncViewer();
 };
 
-$("submit-open").onclick = () => $("submit").showModal();
+/** Opens the form empty for a new post, or filled in to edit `artifact`. */
+function openForm(artifact = null) {
+  const { elements } = $("submit-form");
+  $("submit-form").reset();
+  editing = artifact;
+  $("submit-heading").textContent = artifact ? "Edit your artifact" : "Post a public Claude artifact";
+  $("submit-send").textContent = artifact ? "Save" : "Post";
+  // Link and screenshot are fixed once posted.
+  elements.url.closest("label").hidden = Boolean(artifact);
+  elements.cover.closest("label").hidden = Boolean(artifact);
+  elements.url.required = !artifact;
+  if (artifact) {
+    elements.title.value = artifact.title;
+    elements.description.value = artifact.description;
+    elements.tags.value = artifact.tags.join(", ");
+  }
+  $("submit").showModal();
+}
+
+$("submit-open").onclick = () => openForm();
 $("submit-cancel").onclick = () => $("submit").close();
 $("submit-form").onsubmit = async (event) => {
   event.preventDefault();
   const form = new FormData(event.target);
   const tags = form.get("tags").split(",").map((t) => t.trim().toLowerCase()).filter(Boolean);
-  const body = { url: form.get("url"), title: form.get("title"), description: form.get("description"), tags };
-  if (form.get("cover").size > 0) body.cover = await coverData(form.get("cover"));
+  const body = { title: form.get("title"), description: form.get("description"), tags };
+  if (editing) body.id = editing.id;
+  else body.url = form.get("url");
+  if (!editing && form.get("cover").size > 0) body.cover = await coverData(form.get("cover"));
   $("submit-send").ariaBusy = "true";
   $("submit-send").disabled = true;
-  const posted = await api("submit", body);
+  const posted = await api(editing ? "edit" : "submit", body);
   $("submit-send").ariaBusy = "false";
   $("submit-send").disabled = false;
   if (posted) {

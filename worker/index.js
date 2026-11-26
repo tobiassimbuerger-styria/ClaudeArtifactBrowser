@@ -53,28 +53,41 @@ async function verify(request, env) {
   return session;
 }
 
-function submit(list, user, { url, title, description = "", tags, cover }) {
-  const id = artifactId(url);
-  if (!id) throw new HttpError(400, "Not a public Claude artifact link");
+/** Validates the fields a poster can edit and returns them cleaned up. */
+function details({ title, description = "", tags }) {
   if (typeof title !== "string" || !title.trim() || title.length > MAX_TITLE) {
     throw new HttpError(400, `Title must have 1 to ${MAX_TITLE} characters`);
   }
   if (typeof description !== "string" || description.length > MAX_DESCRIPTION) {
     throw new HttpError(400, `Description must have at most ${MAX_DESCRIPTION} characters`);
   }
-  if (cover !== undefined && (typeof cover !== "string" || cover.length > MAX_COVER || !JPEG_BASE64.test(cover))) {
-    throw new HttpError(400, "Screenshot must be a small JPEG image");
-  }
   if (!Array.isArray(tags) || tags.length > MAX_TAGS || !tags.every((t) => typeof t === "string" && TAG.test(t))) {
     throw new HttpError(400, `Up to ${MAX_TAGS} tags, lowercase letters, digits and dashes only`);
+  }
+  return { title: title.trim(), description: description.trim(), tags };
+}
+
+function ownArtifact(list, user, id) {
+  const artifact = list.find((a) => a.id === id);
+  if (!artifact) throw new HttpError(404, "Unknown artifact");
+  if (artifact.owner !== user.voter) throw new HttpError(403, "You can only change your own posts");
+  return artifact;
+}
+
+function submit(list, user, { url, cover, ...fields }) {
+  const id = artifactId(url);
+  if (!id) throw new HttpError(400, "Not a public Claude artifact link");
+  const { title, description, tags } = details(fields);
+  if (cover !== undefined && (typeof cover !== "string" || cover.length > MAX_COVER || !JPEG_BASE64.test(cover))) {
+    throw new HttpError(400, "Screenshot must be a small JPEG image");
   }
   if (list.some((a) => a.id === id)) throw new HttpError(409, "This artifact was already posted");
   const recent = list.filter((a) => a.owner === user.voter && Date.now() - Date.parse(a.created) < DAY_MS);
   if (recent.length >= MAX_POSTS_PER_DAY) throw new HttpError(429, "Daily post limit reached, try again tomorrow");
   list.push({
     id,
-    title: title.trim(),
-    description: description.trim(),
+    title,
+    description,
     author: user.name,
     owner: user.voter,
     tags,
@@ -100,11 +113,13 @@ function vote(list, user, { id, value }) {
   return `Vote on artifact ${id} [skip ci]`;
 }
 
+function edit(list, user, { id, ...fields }) {
+  Object.assign(ownArtifact(list, user, id), details(fields));
+  return `Edit artifact ${id}`;
+}
+
 function remove(list, user, { id }) {
-  const index = list.findIndex((a) => a.id === id);
-  if (index === -1) throw new HttpError(404, "Unknown artifact");
-  if (list[index].owner !== user.voter) throw new HttpError(403, "You can only delete your own posts");
-  list.splice(index, 1);
+  list.splice(list.indexOf(ownArtifact(list, user, id)), 1);
   return `Delete artifact ${id}`;
 }
 
@@ -169,7 +184,7 @@ async function update(env, mutate) {
   throw new HttpError(503, "Busy, please try again");
 }
 
-const ROUTES = { "/submit": submit, "/vote": vote, "/delete": remove };
+const ROUTES = { "/submit": submit, "/vote": vote, "/edit": edit, "/delete": remove };
 
 export default {
   async fetch(request, env) {
