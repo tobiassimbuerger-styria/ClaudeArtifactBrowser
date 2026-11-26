@@ -8,7 +8,9 @@ const MAX_TAGS = 5;
 const MAX_COVER = 300_000;
 const JPEG_BASE64 = /^\/9j\/[A-Za-z0-9+/]+=*$/;
 const WRITE_ATTEMPTS = 3;
-const SESSION_MS = 30 * 24 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const SESSION_MS = 30 * DAY_MS;
+const MAX_POSTS_PER_DAY = 10;
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -67,6 +69,8 @@ function submit(list, user, { url, title, description = "", tags, cover }) {
     throw new HttpError(400, `Up to ${MAX_TAGS} tags, lowercase letters, digits and dashes only`);
   }
   if (list.some((a) => a.id === id)) throw new HttpError(409, "This artifact was already posted");
+  const recent = list.filter((a) => a.owner === user.voter && Date.now() - Date.parse(a.created) < DAY_MS);
+  if (recent.length >= MAX_POSTS_PER_DAY) throw new HttpError(429, "Daily post limit reached, try again tomorrow");
   list.push({
     id,
     title: title.trim(),
@@ -92,7 +96,8 @@ function vote(list, user, { id, value }) {
   artifact.voters = artifact.voters.filter((v) => v !== user.voter);
   artifact.downvoters = artifact.downvoters.filter((v) => v !== user.voter);
   if (!repeated) artifact[chosen].push(user.voter);
-  return `Vote on artifact ${id}`;
+  // Votes change no page, so they skip the site build; the site reads them live from here.
+  return `Vote on artifact ${id} [skip ci]`;
 }
 
 function remove(list, user, { id }) {
